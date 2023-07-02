@@ -219,13 +219,21 @@ class Home(QWidget):
         if isinstance(answer, tuple):
 
             if answer[0] == Options.BOTH:
+                data_files = {}
+                endo_file = answer[1].get("endo")
+                epi_file = answer[1].get("epi")
+                if endo_file is not None and epi_file is not None:
+                    data_files["endo"] = self.read_ready_file(answer[1].get("endo"))
+                    data_fiels["epi"] = self.read_ready_file(answer[1].get("epi"))
+                elif endo_file is not None:
+                    data_files["endo"] = self.read_ready_file(answer[1].get("endo"))
+                    del data["ready_contours"]["epi"]
+                elif epi_file is not None:
+                    data_files["epi"] = self.read_ready_file(answer[1].get("epi"))
+                    del data["ready_contours"]["endo"]
+                else:
+                    return
 
-                endo = self.read_ready_file(answer[1].get("endo")).get("contours")
-                epi = self.read_ready_file(answer[1].get("epi")).get("contours")
-                data_files = {
-                    "endo": self.read_ready_file(answer[1].get("endo")),
-                    "epi": self.read_ready_file(answer[1].get("epi"))
-                }
                 self.gallery_ready_contours(source_data=data, data_files=data_files)
             else:
 
@@ -268,8 +276,10 @@ class Home(QWidget):
         del source_data["step_processing"]
         del source_data["amount_points"]
 
-        source_data["ready_contours"]["endo"] = endo.get("contours")
-        source_data["ready_contours"]["epi"] = epi.get("contours")
+        if endo is not None:
+            source_data["ready_contours"]["endo"] = endo.get("contours")
+        if epi is not None:
+            source_data["ready_contours"]["epi"] = epi.get("contours")
         source_data["frames"] = [source_data["frames"][n] for n in range(0, len(source_data["frames"]), step)]
         source_data["sys_id"] = sys_id
         source_data["scale_start"] = scale_start

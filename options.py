@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (
     QListWidgetItem, QWidget, QDialog, QVBoxLayout, QLabel, QRadioButton,
-    QHBoxLayout, QListWidget, QCheckBox, QDialogButtonBox, QButtonGroup
+    QHBoxLayout, QListWidget, QCheckBox, QDialogButtonBox, QButtonGroup,
+    QMenu
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 
@@ -41,6 +42,12 @@ class ListContours(QWidget):
         layout.addWidget(title, alignment=Qt.AlignCenter)
         layout.addWidget(list, alignment=Qt.AlignCenter)
         layout.addWidget(checkbox, alignment=Qt.AlignLeft)
+
+        menu = QMenu(self)
+        menu.addAction("Clear", lambda: list.setCurrentRow(-1))
+
+        list.setContextMenuPolicy(Qt.CustomContextMenu)
+        list.customContextMenuRequested.connect(lambda pos: menu.exec_(list.mapToGlobal(pos)))
 
         self.setLayout(layout)
 

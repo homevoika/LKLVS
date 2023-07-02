@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 from support import (EntryLine, EntryLinePostfix, IntValid,
-                     GraphicLine, GraphicPoint, AddGraphicLine, AddGraphicPoint)
+                     GraphicLine, GraphicPoint, AddGraphicLine, AddGraphicPoint, Utils)
 from lucas_kanade import LucasKanade
 
 
@@ -212,20 +212,17 @@ class Picture(QGraphicsView):
 
         pixmap = QPixmap(background)
         graphic_pixmap = QGraphicsPixmapItem(pixmap)
-        self.scene().setSceneRect(0, 0, pixmap.width(), pixmap.height())
 
-        scale = 1
-        screen = QApplication.desktop().availableGeometry()
-        if screen.height() < pixmap.height() + 174:
-            scale *= screen.height() * 0.75 / (pixmap.height() + 174)
-            self.scale(scale, scale)
+        self.scale_value = Utils.get_scale_value(pixmap.size() + QSize(0, 74))
+        self.scale(self.scale_value, self.scale_value)
+        self.scale_counter = 0
 
-        if screen.width() < pixmap.width() * scale:
-            scale *= screen.width() * 0.8 / pixmap.width()
-            self.scale(scale, scale)
-
-        self.scale_value = 0
+        self.scene().setSceneRect(0, 0, pixmap.width() * self.scale_value, pixmap.height() * self.scale_value)
         self.scene().addItem(graphic_pixmap)
+
+    def sizeHint(self) -> QSize:
+        size = self.scene().items(order=Qt.AscendingOrder)[0].pixmap().size()
+        return QSize(size.width() * self.scale_value, size.height() * self.scale_value)
 
     def set_radius_slider(self, slider: QSlider) -> None:
         self._radius = slider

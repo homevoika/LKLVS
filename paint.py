@@ -143,8 +143,8 @@ class Canvas(QGraphicsView):
         graphic_pixmap = DiscolorPixmapItem(background)
         pixmap = graphic_pixmap.pixmap()
 
-        scale = Utils.get_scale_value(pixmap.size() + QSize(0, 74))
-        self.scale(scale, scale)
+        self.scale_value = Utils.get_scale_value(pixmap.size() + QSize(0, 74))
+        self.scale(self.scale_value, self.scale_value)
         self.scale_counter = 0
 
         self.scene().addItem(graphic_pixmap)
@@ -153,6 +153,10 @@ class Canvas(QGraphicsView):
         self.mode = Canvas.LINE
         self.brush = QPen()
         self.cursor_brush = QPen(Qt.white, 3)
+
+    def sizeHint(self) -> QSize:
+        size = self.image.shape
+        return QSize(size[1] * self.scale_value, size[0] * self.scale_value)
 
     def setBrush(self, mode: int = None, width: int = None, color: Union[QColor, int] = None) -> None:
         if width is not None:
