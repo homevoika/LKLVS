@@ -1,0 +1,162 @@
+#workspace {
+    background: white;
+}
+
+QProgressBar {
+    font-family: "HelveticaNowDisplay Medium";
+    background-color: #efefef;
+    color: #5F6ADC;
+    font-size: 13px;
+    border-radius: 8px;
+}
+QProgressBar:chunk {
+    background-color: #5F6ADC;
+    border-radius: 8px;
+}
+
+#caption {
+    font-family: "HelveticaNowDisplay Medium";
+    font-size: 24px;
+    color: #5F6ADC;
+}
+
+QGroupBox {
+    background: #383838;
+    border-radius: 5px;
+    border: none;
+}
+
+#walltypes QPushButton {
+    font-family: "HelveticaNowDisplay Light";
+    font-size: 20px;
+    color: white;
+    height: 36px;
+    width: 80px;
+    background: #72595f;
+    border: none;
+    border-radius: 5px;
+}
+
+#walltypes QPushButton:checked {
+    background: #007efc;
+}
+
+#walltypes QPushButton:hover {
+    background: #007efc;
+}
+
+#walltypes QPushButton:disabled {
+    background: #007efc;
+}
+
+#walltypes QPushButton#connect_button {
+    background: #383838;
+    width: 48px;
+    height: 32px;
+}
+
+#walltypes QPushButton#connect_button:hover {
+    background: #383838;
+}
+
+#action_bar QPushButton {
+    height: 36px;
+    width: 36px;
+    background: #72595f;
+    border: none;
+    border-radius: 5px;
+}
+
+#action_bar QPushButton:checked {
+    background: #007efc;
+}
+
+#action_bar QPushButton:hover {
+    background: #007efc;
+}
+
+#action_bar QLineEdit {
+    font-family: "HelveticaNowDisplay Light";
+    font-size: 20px;
+    height: 36px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    background: #72595f;
+}
+
+QSlider {
+    background: #383838;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+QSlider:groove {
+    border: none;
+    background: #72595f;
+    border-radius: 2px;
+    width: 2px;
+}
+
+QSlider:handle {
+    height: 8px;
+    margin: 0 -8px;
+    background: white;
+    border-radius: 2px;
+}
+
+QSlider:handle:hover {
+    background: #007efc;
+}
+
+#menu {
+    background: white;
+    border-radius: 0;
+}
+
+#menu QPushButton {
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 16px;
+    color: #383838;
+    border: none;
+    border-radius: 4px;
+    background: white;
+    width: 24px;
+    height: 24px;
+}
+
+#menu QPushButton:hover {
+    background: #f6f6f6;
+    border: 1px solid #c9c9c9;
+}
+
+#type_points {
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 14px;
+    border-radius: 4px;
+    height: 24px;
+    width: 70px;
+    background: #e1e1e1;
+    border: 1px solid #c9c9c9;
+}
+
+#type_points:drop-down {
+    image: url("static/images/drow-arrow.png");
+}
+
+#type_points_list {
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 14px;
+    border-radius: 4px;
+    background: #e1e1e1;
+}
+
+#menu EntryLine {
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 14px;
+    border-radius: 4px;
+    height: 24px;
+    width: 70px;
+    background: #e1e1e1;
+    border: 1px solid #c9c9c9;
+}

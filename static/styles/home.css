@@ -1,0 +1,44 @@
+#home {
+    background-color: white;
+}
+
+#title {
+    color: #5F6ADC;
+    font-family: "HelveticaNowDisplay ExtraBold";
+    font-size: 48px;
+}
+
+#title_entry {
+    color: #5F6ADC;
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 20px;
+}
+
+#entry {
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 24px;
+    height: 48px;
+    width: 240px;
+    border: 1px solid #5F6ADC;
+    background-color: #f8f9fa;
+    color: #5F6ADC;
+    border-radius: 10px;
+    padding-left: 5px;
+}
+
+#select_files {
+    font-family: "HelveticaNowDisplay Medium";
+    height: 64px;
+    font-size: 32px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border: 1px solid #5F6ADC;
+    background-color: #5F6ADC;
+    color: white;
+    border-radius: 13px;
+}
+
+#select_files:hover {
+    background-color: white;
+    color: #5F6ADC;
+}

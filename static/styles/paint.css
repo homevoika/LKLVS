@@ -1,0 +1,60 @@
+#paint {
+    background: white;
+}
+
+#instruments {
+    background: #383838;
+    border-radius: 8px;
+    border: none;
+}
+
+QPushButton {
+    font-family: "HelveticaNowDisplay Light";
+    font-size: 20px;
+    color: white;
+    height: 36px;
+    width: 36px;
+    background: #72595f;
+    border: none;
+    border-radius: 5px;
+}
+
+QPushButton:hover {
+    background: #007efc;
+}
+
+QPushButton:checked {
+    background: #007efc;
+}
+
+#type_brush {
+    background: #72595f;
+}
+
+#type_brush:disabled {
+    color: #bfbfbf;
+}
+
+#type_brush:hover {
+    background: #007efc;
+}
+
+#accept:hover {
+    background: #37c853;
+}
+
+QLineEdit {
+    font-family: "HelveticaNowDisplay Light";
+    font-size: 20px;
+    color: white;
+    height: 36px;
+    width: 48px;
+    border: none;
+    background: #72595f;
+    border-radius: 5px;
+}
+
+#type_brush {
+    width: 80px;
+}
+

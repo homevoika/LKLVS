@@ -1,0 +1,124 @@
+#options {
+    background-color: white;
+}
+
+#title {
+    color: black;
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 24px;
+}
+
+QRadioButton {
+    color: black;
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 20px;
+}
+
+QRadioButton:indicator {
+    width: 14px;
+    height: 14px;
+}
+
+QRadioButton:indicator:checked {
+    image: url("static/images/radiobutton_select.png");
+}
+
+QRadioButton:indicator:unchecked:hover {
+    image: url("static/images/radiobutton_hover.png");
+}
+
+QRadioButton:indicator:unchecked {
+    image: url("static/images/radiobutton_clear.png");
+}
+
+#title_list {
+    color: black;
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 16px;
+}
+
+#title_list:disabled {
+    color: silver;
+}
+
+QListWidget {
+    border: 1px solid black;
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 16px;
+}
+
+QListWidget:disabled {
+    border: 1px solid silver;
+    background: white;
+}
+
+QListWidget:item:disabled {
+    color: silver;
+    background: white;
+}
+
+QListWidget:item:selected {
+    color: white;
+    background: #0093FF;
+}
+
+QListWidget:item:selected:disabled {
+    color: silver;
+    background: white;
+}
+
+QListWidget:item:!selected:hover {
+    background: #ACDAFF;
+}
+
+
+QCheckBox {
+    color: black;
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 16px;
+}
+
+QCheckBox:disabled {
+    color: silver;
+}
+
+QCheckBox:indicator {
+    width: 14px;
+    height: 14px;
+}
+
+QCheckBox:indicator:unchecked:disabled {
+    image: url("static/images/checkbox_disable.png");
+}
+
+QCheckBox:indicator:checked:disabled {
+    image: url("static/images/checkbox_disable_checked.png");
+}
+
+QCheckBox:indicator:checked {
+    image: url("static/images/checkbox_select.png");
+}
+
+QCheckBox:indicator:unchecked:hover {
+    image: url("static/images/checkbox_hover.png");
+}
+
+QCheckBox:indicator:unchecked {
+    image: url("static/images/checkbox_clear.png");
+}
+
+
+QDialogButtonBox QPushButton {
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 18px;
+    padding: 3px 20px 3px 20px;
+    color: white;
+    background: #0093FF;
+    border: none;
+    border-radius: 4px;
+}
+
+QDialogButtonBox QPushButton:hover {
+    background: #51a2ff;
+}
+
