@@ -223,13 +223,13 @@ class Home(QWidget):
                 endo_file = answer[1].get("endo")
                 epi_file = answer[1].get("epi")
                 if endo_file is not None and epi_file is not None:
-                    data_files["endo"] = self.read_ready_file(answer[1].get("endo"))
-                    data_fiels["epi"] = self.read_ready_file(answer[1].get("epi"))
+                    data_files["endo"] = self.read_ready_file(endo_file)
+                    data_files["epi"] = self.read_ready_file(epi_file)
                 elif endo_file is not None:
-                    data_files["endo"] = self.read_ready_file(answer[1].get("endo"))
+                    data_files["endo"] = self.read_ready_file(endo_file)
                     del data["ready_contours"]["epi"]
                 elif epi_file is not None:
-                    data_files["epi"] = self.read_ready_file(answer[1].get("epi"))
+                    data_files["epi"] = self.read_ready_file(epi_file)
                     del data["ready_contours"]["endo"]
                 else:
                     return
@@ -364,8 +364,14 @@ class Home(QWidget):
         self.workspace.show()
 
     def gallery_ready_images(self, source_data: dict) -> None:
+        frames = source_data.get("frames")
+        step = source_data.get("step_processing")
         source_data["ready_contours"] = source_data["ready_images"]
-        source_data["sys_id"] = self.find_sys_id(source_data.get("frames"), source_data.get("step_processing"))
+        source_data["sys_id"] = self.find_sys_id(frames, step)
+
+        if step > 1:
+            source_data["frames"] = [source_data["frames"][n] for n in range(0, len(source_data["frames"]), step)]
+
         del source_data["ready_images"]
         self.workspace = Workspace(source_data)
         self.workspace.show()

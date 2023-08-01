@@ -91,7 +91,7 @@ class Menu(QGroupBox):
             msg.setText("File already exist. Overwrite?")
             msg.addButton(QMessageBox.Ok)
             msg.addButton(QMessageBox.Cancel)
-            if msg.exec_():
+            if msg.exec_() == QMessageBox.Ok:
                 self.file_data(path)
                 msg = QMessageBox()
                 msg.setWindowTitle("Saved")
@@ -304,14 +304,17 @@ class Picture(QGraphicsView):
             self.change_radius(self._radius.value())
             return
 
-        if delta < 0 and self.scale_value == 0:
+        if delta < 0 and self.scale_counter == 0:
+            return
+
+        if delta > 0 and self.scale_counter == 20:
             return
 
         if delta > 0:
-            self.scale_value += 1
+            self.scale_counter += 1
             self.scale(1.25, 1.25)
         else:
-            self.scale_value -= 1
+            self.scale_counter -= 1
             self.scale(1 / 1.25, 1 / 1.25)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:

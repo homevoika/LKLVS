@@ -6,8 +6,7 @@ from typing import Literal, Union
 from qimage2ndarray import array2qimage, rgb_view
 import numpy as np
 
-from support import EntryLine, Utils
-import time
+from support import EntryLine, Utils, ToggleButton
 
 
 class Instruments(QGroupBox):
@@ -24,21 +23,18 @@ class Instruments(QGroupBox):
         layout.setAlignment(Qt.AlignCenter)
         layout.setSpacing(10)
 
-        type_brush = QPushButton()
+        type_brush = ToggleButton()
         type_brush.setObjectName("type_brush")
-
         type_brush.setText("ENDO")
-        type_brush.setCheckable(True)
         type_brush.toggled.connect(
             lambda enable: type_brush.setText("EPI") if enable else type_brush.setText("ENDO"))
 
         button_group = QButtonGroup(self)
 
-        brush = QPushButton()
+        brush = ToggleButton()
         brush.setIcon(QIcon("static/images/brush.png"))
         brush.setIconSize(QSize(42, 42))
         brush.setObjectName("brush")
-        brush.setCheckable(True)
         brush.toggle()
         button_group.addButton(brush)
 
@@ -49,18 +45,16 @@ class Instruments(QGroupBox):
         width.setMaxLength(2)
         width.setText("1")
 
-        eraser = QPushButton()
+        eraser = ToggleButton()
         eraser.setIcon(QIcon("static/images/eraser.png"))
         eraser.setIconSize(QSize(19, 19))
         eraser.setObjectName("eraser")
-        eraser.setCheckable(True)
         button_group.addButton(eraser)
 
-        dot_brush = QPushButton()
+        dot_brush = ToggleButton()
         dot_brush.setIcon(QIcon("static/images/dot_brush.png"))
         dot_brush.setIconSize(QSize(18, 18))
         dot_brush.setObjectName("dot_brush")
-        dot_brush.setCheckable(True)
         button_group.addButton(dot_brush)
 
         accept = QPushButton()
@@ -320,7 +314,7 @@ class Canvas(QGraphicsView):
             bottom_pixel = self.image.shape[0]
 
         frame = self.image[top_pixel:bottom_pixel, left_pixel:right_pixel, :]
-        light_pixels = np.count_nonzero(frame.sum(axis=2) / 3 > 200)
+        light_pixels = np.count_nonzero(frame.sum(axis=2) / 3 > 120)
         all_pixels = frame.shape[0] * frame.shape[1]
 
         try:

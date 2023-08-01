@@ -1,7 +1,16 @@
 from PyQt5.QtWidgets import (QLineEdit, QGraphicsEllipseItem, QGraphicsLineItem,
-                             QGraphicsItem, QWidget, QApplication, QStyle)
+                             QGraphicsItem, QWidget, QApplication, QStyle, QPushButton)
 from PyQt5.Qt import (QKeyEvent, QValidator, pyqtSignal, QObject, Qt,
                       QPointF, QPen, QColor, QLineF, QSize, QPoint, QRect)
+
+
+class ToggleButton(QPushButton):
+    def __init__(self):
+        super().__init__()
+        self.setCheckable(True)
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        pass
 
 
 class GraphicLine(QGraphicsLineItem):

@@ -5,10 +5,8 @@ from PyQt5.QtCore import QThread, pyqtSignal, QPoint, QPointF
 from PyQt5.QtGui import QImage
 
 from qimage2ndarray import rgb_view
-from skimage.color.colorconv import rgb2gray, rgba2rgb
-from skimage.color import rgb2hsv
+from skimage.color.colorconv import rgb2gray, rgba2rgb, rgb2hsv
 from skimage.transform import pyramid_gaussian
-from qimage2ndarray import rgb_view
 
 
 def _mean_vector(cont_x, cont_y, x_point, y_point):
@@ -321,7 +319,7 @@ class LucasKanade(QThread):
 
                 x_s, y_s, *_ = _get_points(contour, self.amount_points)
                 contours[wall] = [QPointF(x, y) for x, y in zip(x_s, y_s)]
-            elif isinstance(contour[0], list):
+            elif isinstance(contour, list) and isinstance(contour[0], list):
                 data[wall] = contour
             elif isinstance(contour, list):
                 contours[wall] = contour
