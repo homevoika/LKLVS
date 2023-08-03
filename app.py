@@ -4,7 +4,6 @@ from PyQt5.QtGui import QFontDatabase
 from PyQt5.QtCore import QPoint
 
 from home import Home
-from paint import Paint
 
 app = QApplication([])
 
@@ -14,11 +13,5 @@ for font in fonts:
 
 home = Home()
 home.show()
-
-# paint = Paint("C:/Users/Riddle/Desktop/01_np/00.jpeg")
-# paint.show()
-
-# workspace = Workspace()
-# workspace.show()
 
 app.exec_()

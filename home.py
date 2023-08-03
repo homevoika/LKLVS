@@ -1,4 +1,3 @@
-from magic import Magic
 import os
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog
@@ -120,21 +119,23 @@ class Home(QWidget):
             "frames": []
         }
 
-        mime = Magic(mime=True)
-        file_analysis = lambda file, type_file, type_wall: all((mime.from_file(file).startswith(type_file),
-                                                                file.split(".")[0].endswith(type_wall)))
+        txt_exts = ("txt")
+        img_exts = ("jpeg", "jpg", "png", "bmp")
+
         try:
             for file in os.listdir(dir):
+                name, ext = file.split(".")
                 path_file = os.path.join(dir, file)
-                if file_analysis(path_file, "text", "_endo"):
+
+                if ext in txt_exts and name.endswith("_endo"):
                     data["ready_contours"]["endo"].append(path_file)
-                elif file_analysis(path_file, "text", "_epi"):
+                elif ext in txt_exts and name.endswith("_epi"):
                     data["ready_contours"]["epi"].append(path_file)
-                elif file_analysis(path_file, "image", "_endo"):
+                elif ext in img_exts and name.endswith("_endo"):
                     data["ready_images"]["endo"] = path_file
-                elif file_analysis(path_file, "image", "_epi"):
+                elif ext in img_exts and name.endswith("_epi"):
                     data["ready_images"]["epi"] = path_file
-                elif mime.from_file(path_file).startswith("image"):
+                elif ext in img_exts:
                     data["frames"].append(path_file)
         except PermissionError:
             return {}
