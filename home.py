@@ -218,7 +218,6 @@ class Home(QWidget):
         answer = options.exec_()
 
         if isinstance(answer, tuple):
-
             if answer[0] == Options.BOTH:
                 data_files = {}
                 endo_file = answer[1].get("endo")
@@ -234,10 +233,10 @@ class Home(QWidget):
                     del data["ready_contours"]["endo"]
                 else:
                     return
-
                 self.gallery_ready_contours(source_data=data, data_files=data_files)
             else:
-
+                if answer[1] is None:
+                    return
                 type = Paint.READY_ENDO if answer[0] == Options.ENDO else Paint.READY_EPI
                 contour = self.read_ready_file(answer[1])
                 self.gallery_ready_contour(source_data=data, type=type, data_file=contour)
@@ -296,6 +295,12 @@ class Home(QWidget):
         scale_start = data_file.get("scale_start")
         scale_end = data_file.get("scale_end")
         del source_data["step_processing"]
+
+        if scale_start == QPoint(-1, -1):
+            scale_start = None
+
+        if scale_end == QPoint(-1, -1):
+            scale_end = None
 
         paint = Paint(background=frames[0],
                       type=type,

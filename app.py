@@ -1,9 +1,8 @@
 import os
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFontDatabase
-from PyQt5.QtCore import QPoint
 
-from home import Home
+from home import Home, Paint
 
 app = QApplication([])
 

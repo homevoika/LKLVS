@@ -61,6 +61,7 @@ class Instruments(QGroupBox):
         accept.setIcon(QIcon("static/images/accept.png"))
         accept.setIconSize(QSize(22, 22))
         accept.setObjectName("accept")
+        accept.setCursor(Qt.PointingHandCursor)
 
         layout.addWidget(type_brush)
         layout.addWidget(brush)
@@ -146,7 +147,6 @@ class Canvas(QGraphicsView):
         self.image = rgb_view(pixmap.toImage())
         self.mode = Canvas.LINE
         self.brush = QPen()
-        self.cursor_brush = QPen(Qt.white, 3)
 
     def sizeHint(self) -> QSize:
         size = self.image.shape
@@ -279,12 +279,12 @@ class Canvas(QGraphicsView):
         if event.buttons() & Qt.RightButton:
             self.scroll(event.pos())
 
-        if self.background_bright(event.pos()):
-            self.cursor_brush.setColor(Qt.black)
-        else:
-            self.cursor_brush.setColor(Qt.white)
-
-        self.set_cursor()
+        # if self.background_bright(event.pos()):
+        #     self.cursor_brush.setColor(Qt.black)
+        # else:
+        #     self.cursor_brush.setColor(Qt.white)
+        #
+        # self.set_cursor()
 
         super().mouseMoveEvent(event)
 
@@ -314,7 +314,7 @@ class Canvas(QGraphicsView):
             bottom_pixel = self.image.shape[0]
 
         frame = self.image[top_pixel:bottom_pixel, left_pixel:right_pixel, :]
-        light_pixels = np.count_nonzero(frame.sum(axis=2) / 3 > 120)
+        light_pixels = np.count_nonzero(frame.sum(axis=2) / 3 > 222)
         all_pixels = frame.shape[0] * frame.shape[1]
 
         try:
@@ -329,50 +329,70 @@ class Canvas(QGraphicsView):
         else:
             size = QSize(1, 1)
 
+        tr_black = 170
+        tr_white = 255
+
         if size.width() < 5:
             cursor = QPixmap(QSize(19, 19))
             cursor.fill(Qt.transparent)
 
             painter = QPainter(cursor)
-            self.cursor_brush.setWidth(3)
-            painter.setPen(self.cursor_brush)
+            painter.setPen(QPen(QColor(0, 0, 0, tr_black), 1))
 
             radius = size.width() // 2
-            dist = 6
+            dist = 5
             rect = cursor.rect()
             center = rect.center()
 
+            painter.drawLine(rect.x(), center.y() - 1, center.x() - dist, center.y() - 1)
+            painter.drawLine(rect.x(), center.y() + 1, center.x() - dist, center.y() + 1)
+            painter.drawLine(center.x() + dist, center.y() + 1, rect.width() - 1, center.y() + 1)
+            painter.drawLine(center.x() + dist, center.y() - 1, rect.width() - 1, center.y() - 1)
+            painter.drawLine(center.x() - 1, rect.y(), center.x() - 1, center.y() - dist)
+            painter.drawLine(center.x() + 1, rect.y(), center.x() + 1, center.y() - dist)
+            painter.drawLine(center.x() + 1, center.y() + dist, center.x() + 1, rect.height() - 1)
+            painter.drawLine(center.x() - 1, center.y() + dist, center.x() - 1, rect.height() - 1)
+
+            painter.setPen(QPen(QColor(255, 255, 255, tr_white), 1))
             painter.drawLine(rect.x(), center.y(), center.x() - dist, center.y())
             painter.drawLine(center.x() + dist, center.y(), rect.width() - 1, center.y())
             painter.drawLine(center.x(), rect.y(), center.x(), center.y() - dist)
             painter.drawLine(center.x(), center.y() + dist, center.x(), rect.height() - 1)
 
-            self.cursor_brush.setWidth(1)
-            painter.setPen(self.cursor_brush)
-
             if size.width() > 1:
                 if self.mode == Canvas.LINE:
+                    painter.setPen(QPen(QColor(0, 0, 0, tr_black), 3))
+                    painter.drawPoint(center.x(), center.y())
+                    painter.setPen(QPen(QColor(255, 255, 255, tr_white), 1))
                     painter.drawEllipse(center.x() - radius, center.y() - radius, radius * 2, radius * 2)
                 elif self.mode == Canvas.ERASE:
                     painter.drawRect(center.x() - radius, center.y() - radius, radius * 2, radius * 2)
             else:
+                painter.setPen(QPen(QColor(0, 0, 0, tr_black), 3))
+                painter.drawPoint(center.x(), center.y())
+                painter.setPen(QPen(QColor(255, 255, 255, tr_white), 1))
                 painter.drawPoint(center.x(), center.y())
 
             painter.end()
         else:
-            cursor = QPixmap(QSize(size.width() + self.cursor_brush.width() + 1,
-                                   size.height() + self.cursor_brush.width() + 1))
+            cursor = QPixmap(QSize(size.width() + 3 + 1, size.height() + 3 + 1))
             cursor.fill(Qt.transparent)
             painter = QPainter(cursor)
-            painter.setPen(self.cursor_brush)
+            painter.setPen(QPen(QColor(0, 0, 0, tr_black), 1))
             center = cursor.rect().center() + QPoint(1, 1)
             if self.mode == Canvas.LINE:
                 painter.setRenderHint(QPainter.Antialiasing)
                 painter.drawEllipse(center.x() - size.width() / 2, center.y() - size.height() / 2,
                                     size.width(), size.height())
+                painter.setPen(QPen(QColor(255, 255, 255, tr_white), 1))
+                painter.drawEllipse(center.x() - size.width() / 2 + 1, center.y() - size.height() / 2 + 1,
+                                    size.width() - 2, size.height() - 2)
             elif self.mode == Canvas.ERASE:
                 painter.drawRect(center.x() - size.width() / 2, center.y() - size.height() / 2,
                                  size.width(), size.height())
+                painter.setPen(QPen(QColor(255, 255, 255, tr_white), 1))
+                painter.drawRect(center.x() - size.width() / 2 + 1, center.y() - size.height() / 2 + 1,
+                                 size.width() - 2, size.height() - 2)
             painter.end()
 
         super().setCursor(QCursor(cursor))
@@ -463,6 +483,8 @@ class Paint(QDialog):
         width.textEdited.connect(self.change_width)
         accept.clicked.connect(self.accept)
 
+        self.showMaximized()
+
     def change_type_brush(self, type: int) -> None:
         dot_brush: QPushButton = self.findChild(QPushButton, "dot_brush")
         if dot_brush.isChecked():
@@ -500,7 +522,7 @@ class Paint(QDialog):
         if enable:
             canvas: Canvas = self.findChild(Canvas)
             width: EntryLine = self.findChild(EntryLine, "width")
-            canvas.setBrush(mode=Canvas.ERASE, width=int(width.text()) + 3)
+            canvas.setBrush(mode=Canvas.ERASE, width=int(width.text()) + 4)
 
     def change_dot_brush(self, enable: bool) -> None:
         if enable:
@@ -526,8 +548,8 @@ class Paint(QDialog):
         epi_exist = np.any(contours["epi"])
 
         try:
-            contours["scale_start"] = QPoint(contours.get("scale")[0][0], contours.get("scale")[0][1])
-            contours["scale_end"] = QPoint(contours.get("scale")[1][0], contours.get("scale")[1][1])
+            contours["scale_start"] = QPoint(contours.get("scale")[0][1], contours.get("scale")[0][0])
+            contours["scale_end"] = QPoint(contours.get("scale")[1][1], contours.get("scale")[1][0])
         except IndexError:
             contours["scale_start"] = QPoint(-1, -1)
             contours["scale_end"] = QPoint(-1, -1)

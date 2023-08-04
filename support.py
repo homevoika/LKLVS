@@ -8,6 +8,7 @@ class ToggleButton(QPushButton):
     def __init__(self):
         super().__init__()
         self.setCheckable(True)
+        self.setCursor(Qt.PointingHandCursor)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         pass

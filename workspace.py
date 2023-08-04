@@ -85,22 +85,37 @@ class Menu(QGroupBox):
 
         path = os.path.join(self.dir, title_file)
 
-        if os.path.exists(f"{path}_endo.txt") or os.path.exists(f"{path}_epi.txt"):
-            msg = QMessageBox()
-            msg.setWindowTitle("Overwrite")
-            msg.setText("File already exist. Overwrite?")
-            msg.addButton(QMessageBox.Ok)
-            msg.addButton(QMessageBox.Cancel)
-            if msg.exec_() == QMessageBox.Ok:
+        endo_exist = self.data.get("ready_contours").get("endo") is not None
+        epi_exist = self.data.get("ready_contours").get("epi") is not None
+        endo_file_exist = os.path.exists(f"{path}_endo.txt")
+        epi_file_exist = os.path.exists(f"{path}_epi.txt")
+
+        quest = QMessageBox()
+        quest.setWindowTitle("Overwrite")
+        quest.addButton(QMessageBox.Ok)
+        quest.addButton(QMessageBox.Cancel)
+
+        msg = QMessageBox()
+        msg.setWindowTitle("Saved")
+        msg.setText("Data saved successfully")
+
+        if endo_exist and epi_exist and (endo_file_exist or epi_file_exist):
+            quest.setText("Files already exist. Overwrite?")
+            if quest.exec_() == QMessageBox.Ok:
                 self.file_data(path)
-                msg = QMessageBox()
-                msg.setWindowTitle("Saved")
-                msg.setText("Data saved successfully")
+                msg.exec_()
+        elif endo_exist and endo_file_exist:
+            quest.setText("Endo file already exist. Overwrite?")
+            if quest.exec_() == QMessageBox.Ok:
+                self.file_data(path)
+                msg.exec_()
+        elif epi_exist and epi_file_exist:
+            quest.setText("Epi file already exist. Overwrite?")
+            if quest.exec_() == QMessageBox.Ok:
+                self.file_data(path)
                 msg.exec_()
         else:
             self.file_data(path)
-            msg = QMessageBox()
-            msg.setText("Data saved successfully")
             msg.exec_()
 
     def file_data(self, path: str) -> None:
@@ -213,11 +228,10 @@ class Picture(QGraphicsView):
         pixmap = QPixmap(background)
         graphic_pixmap = QGraphicsPixmapItem(pixmap)
 
-        self.scale_value = Utils.get_scale_value(pixmap.size() + QSize(0, 74))
+        self.scale_value = Utils.get_scale_value(pixmap.size() + QSize(0, 350))
         self.scale(self.scale_value, self.scale_value)
         self.scale_counter = 0
 
-        self.scene().setSceneRect(0, 0, pixmap.width() * self.scale_value, pixmap.height() * self.scale_value)
         self.scene().addItem(graphic_pixmap)
 
     def sizeHint(self) -> QSize:
@@ -453,7 +467,7 @@ class Gallery(QWidget):
         self.setObjectName("gallery")
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 10)
+        layout.setContentsMargins(0, 10, 0, 10)
         layout.setSpacing(10)
 
         menu = Menu(data)
@@ -491,7 +505,7 @@ class Gallery(QWidget):
 
         radius_slider = QSlider(Qt.Vertical, self)
         radius_slider.setMinimum(5)
-        radius_slider.setValue(50)
+        radius_slider.setValue(30)
         radius_slider.setFixedSize(36, 150)
         action_bar.set_radius_slider(radius_slider, 10)
         picture.set_radius_slider(radius_slider)
@@ -602,9 +616,7 @@ class Workspace(QStackedWidget):
         self.addWidget(wait)
         self.addWidget(gallery)
 
-        screen = QApplication.desktop().availableGeometry()
-        center = screen.center() - QPoint(self.sizeHint().width() // 2, self.sizeHint().height() // 2)
-        self.setGeometry(center.x(), center.y(), self.sizeHint().width(), self.sizeHint().height())
+        Utils.move_center_hint(self)
 
     def __init__(self, data: dict = None):
         super().__init__()
@@ -618,6 +630,8 @@ class Workspace(QStackedWidget):
         self.lucas_kanade.released.connect(self.init_gallery)
 
         self.segmentation(data)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.showMaximized()
 
     def init_gallery(self, contours: dict) -> None:
         gallery: Gallery = self.widget(1)
