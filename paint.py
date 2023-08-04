@@ -529,6 +529,9 @@ class Paint(QDialog):
             canvas: Canvas = self.findChild(Canvas)
             canvas.setBrush(mode=Canvas.POINT, color=Canvas.PURPLE, width=1)
 
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        pass
+
     def exec_(self) -> Union[dict, int]:
         done = super().exec_()
 
