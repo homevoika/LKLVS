@@ -378,9 +378,6 @@ class Home(QWidget):
 
         del source_data["step_processing"]
 
-        for t in source_data["frames"]:
-            print(t)
-
         self.workspace = Workspace(source_data)
         self.workspace.show()
 
