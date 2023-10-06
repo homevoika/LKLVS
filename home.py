@@ -155,7 +155,19 @@ class Home(QWidget):
             exist_ready_images = False
             del data["ready_images"]
 
-        data["frames"].sort(key=lambda name: os.path.basename(name))
+        try:
+            from pathlib import Path
+
+            def key(path: str) -> int:
+                name = Path(path).stem
+                try:
+                    return int("".join([v for v in name if v.isdigit()]))
+                except ValueError:
+                    return float("inf")
+
+            data["frames"].sort(key=key)
+        except:
+            print("Failed sorting")
 
         return exist_ready_contours or exist_ready_images
 
@@ -365,6 +377,9 @@ class Home(QWidget):
             source_data["frames"] = [source_data["frames"][n] for n in range(0, len(source_data["frames"]), step)]
 
         del source_data["step_processing"]
+
+        for t in source_data["frames"]:
+            print(t)
 
         self.workspace = Workspace(source_data)
         self.workspace.show()
