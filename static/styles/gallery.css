@@ -125,12 +125,16 @@ QSlider:handle:hover {
     height: 24px;
 }
 
+#menu #save_imgs {
+    width: 41px;
+}
+
 #menu QPushButton:hover {
     background: #f6f6f6;
     border: 1px solid #c9c9c9;
 }
 
-#type_points {
+QComboBox {
     font-family: "HelveticaNowDisplay Regular";
     font-size: 14px;
     border-radius: 4px;
@@ -140,15 +144,38 @@ QSlider:handle:hover {
     border: 1px solid #c9c9c9;
 }
 
-#type_points:drop-down {
+#type_images {
+    width: 100px;
+}
+
+QComboBox:drop-down {
     image: url("static/images/drow-arrow.png");
 }
 
-#type_points_list {
+QListView {
     font-family: "HelveticaNowDisplay Regular";
     font-size: 14px;
     border-radius: 4px;
     background: #e1e1e1;
+}
+
+QMenu {
+    font-family: "HelveticaNowDisplay Regular";
+    font-size: 14px;
+    background: #e1e1e1;
+    border: none;
+}
+
+QMenu:item {
+    padding-left: 4px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    width: 70px;
+}
+
+QMenu:item:selected {
+    background: #b4d0e7;
+    color: black;
 }
 
 #menu EntryLine {
