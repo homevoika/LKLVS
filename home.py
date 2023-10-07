@@ -124,6 +124,10 @@ class Home(QWidget):
 
         try:
             for file in os.listdir(dir):
+
+                if os.path.isdir(os.path.join(dir, file)):
+                    continue
+
                 name, ext = file.split(".")
                 path_file = os.path.join(dir, file)
 
@@ -274,24 +278,38 @@ class Home(QWidget):
         frames = source_data.get("frames")
         endo = data_files.get("endo")
         epi = data_files.get("epi")
-        try:
-            sys_id = int(endo.get("sys_id"))
-        except TypeError:
-            sys_id = -1
-        scale_start = endo.get("scale_start")
-        scale_end = endo.get("scale_end")
 
-        step = 1
-        if len(frames) != len(endo.get("contours")):
-            step = round(len(frames) / len(endo.get("contours")))
+        if endo is not None:
+            try:
+                sys_id = int(endo.get("sys_id"))
+            except TypeError:
+                sys_id = -1
+            scale_start = endo.get("scale_start")
+            scale_end = endo.get("scale_end")
+
+            step = 1
+            if len(frames) != len(endo.get("contours")):
+                step = round(len(frames) / len(endo.get("contours")))
+
+            source_data["ready_contours"]["endo"] = endo.get("contours")
+
+        if epi is not None:
+            try:
+                sys_id = int(epi.get("sys_id"))
+            except TypeError:
+                sys_id = -1
+            scale_start = epi.get("scale_start")
+            scale_end = epi.get("scale_end")
+
+            step = 1
+            if len(frames) != len(epi.get("contours")):
+                step = round(len(frames) / len(epi.get("contours")))
+
+            source_data["ready_contours"]["epi"] = epi.get("contours")
 
         del source_data["step_processing"]
         del source_data["amount_points"]
 
-        if endo is not None:
-            source_data["ready_contours"]["endo"] = endo.get("contours")
-        if epi is not None:
-            source_data["ready_contours"]["epi"] = epi.get("contours")
         source_data["frames"] = [source_data["frames"][n] for n in range(0, len(source_data["frames"]), step)]
         source_data["sys_id"] = sys_id
         source_data["scale_start"] = scale_start
