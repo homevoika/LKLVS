@@ -11,7 +11,7 @@ from lucas_kanade import LucasKanade
 
 
 class Menu(QGroupBox):
-    def _setUI(self, dir_name: str) -> None:
+    def _setUI(self, dir_name: str, parent: QWidget) -> None:
         self.setObjectName("menu")
 
         layout = QHBoxLayout()
@@ -24,26 +24,49 @@ class Menu(QGroupBox):
         title_file.setText(dir_name)
         title_file.setFixedWidth(200)
 
-        # save_path = QPushButton()
-        # save_path.setObjectName("save_path")
-        # save_path.setIcon(QIcon("static/images/save_path.png"))
-        # save_path.setIconSize(QSize(20, 20))
-        # save_path.setCursor(Qt.PointingHandCursor)
-        # save_path.setToolTip("Save with path choice")
+        save_imgs = QPushButton()
+        save_imgs.setObjectName("save_imgs")
+        save_imgs.setIcon(QIcon("static/images/save_imgs_arrow.png"))
+        save_imgs.setIconSize(QSize(35, 35))
+        save_imgs.setCursor(Qt.PointingHandCursor)
 
-        save = QPushButton()
-        save.setObjectName("save")
-        save.setIcon(QIcon("static/images/save.png"))
-        save.setIconSize(QSize(20, 20))
-        save.setCursor(Qt.PointingHandCursor)
-        save.setToolTip("Save in directory")
-        save.clicked.connect(self.save)
+        type_imgs = QMenu(parent)
+        save_imgs.clicked.connect(
+            lambda: (type_imgs.move(self.mapToGlobal(save_imgs.pos() + QPoint(0, 25))), type_imgs.show()))
+
+        endo_exist = self.data.get("ready_contours").get("endo") is not None
+        epi_exist = self.data.get("ready_contours").get("epi") is not None
+
+        if endo_exist and epi_exist:
+            endo_action = QAction("Endo", type_imgs)
+            endo_action.triggered.connect(self.save_endo_imgs)
+            epi_action = QAction("Epi", type_imgs)
+            epi_action.triggered.connect(self.save_epi_imgs)
+            all_action = QAction("All", type_imgs)
+            all_action.triggered.connect(self.save_both_imgs)
+            type_imgs.addActions((endo_action, epi_action, all_action))
+        elif endo_exist:
+            endo_action = QAction("Endo", type_imgs)
+            endo_action.triggered.connect(self.save_endo_imgs)
+            type_imgs.addAction(endo_action)
+        elif epi_exist:
+            epi_action = QAction("Epi", type_imgs)
+            epi_action.triggered.connect(self.save_epi_imgs)
+            type_imgs.addAction(epi_action)
+
+        save_data = QPushButton()
+        save_data.setObjectName("save_data")
+        save_data.setIcon(QIcon("static/images/save_data.png"))
+        save_data.setIconSize(QSize(20, 20))
+        save_data.setCursor(Qt.PointingHandCursor)
+        save_data.setToolTip("Save data")
+        save_data.clicked.connect(self.save_data)
 
         type_points = QComboBox()
         type_points.setObjectName("type_points")
-        items = QListView()
-        items.setObjectName("type_points_list")
-        type_points.setView(items)
+        type_points_list = QListView()
+        type_points_list.setObjectName("type_points_list")
+        type_points.setView(type_points_list)
         type_points.addItems(["Integer", "Float"])
 
         entry_float_values = EntryLine()
@@ -58,23 +81,23 @@ class Menu(QGroupBox):
         type_points.currentTextChanged.connect(
             lambda type: entry_float_values.show() if type == "Float" else entry_float_values.hide())
 
-        # layout.addWidget(save_path)
-        layout.addWidget(save)
+        layout.addWidget(save_imgs)
+        layout.addWidget(save_data)
         layout.addWidget(title_file, alignment=Qt.AlignLeft)
         layout.addWidget(type_points)
         layout.addWidget(entry_float_values, alignment=Qt.AlignLeft)
 
         self.setLayout(layout)
 
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, parent: QWidget):
         super().__init__()
 
         self.data = data
         self.dir = os.path.dirname(data.get("frames")[0])
 
-        self._setUI(os.path.basename(self.dir))
+        self._setUI(os.path.basename(self.dir), parent)
 
-    def save(self) -> None:
+    def save_data(self) -> None:
 
         title_file = f"{self.findChild(EntryLine, 'title_file').text().strip()}"
 
@@ -117,6 +140,65 @@ class Menu(QGroupBox):
         else:
             self.file_data(path)
             msg.exec_()
+
+    def save_endo_imgs(self) -> None:
+        self.save_imgs(["endo"])
+        msg = QMessageBox()
+        msg.setWindowTitle("Saved")
+        msg.setText("Endo images saved successfully")
+        msg.exec_()
+
+    def save_epi_imgs(self) -> None:
+        self.save_imgs(["epi"])
+        msg = QMessageBox()
+        msg.setWindowTitle("Saved")
+        msg.setText("Epi images saved successfully")
+        msg.exec_()
+
+    def save_both_imgs(self) -> None:
+        self.save_imgs(["endo", "epi"])
+        msg = QMessageBox()
+        msg.setWindowTitle("Saved")
+        msg.setText("Endo and epi images saved successfully")
+        msg.exec_()
+
+    def save_imgs(self, types: list) -> None:
+
+        title_file = f"{self.findChild(EntryLine, 'title_file').text().strip()}"
+
+        if not title_file:
+            msg = QMessageBox()
+            msg.setText("File name is empty")
+            return msg.exec_()
+
+        from shutil import rmtree
+
+        title_file += f"_{types[0]}" if len(types) < 2 else f"_both"
+        path = os.path.join(self.dir, title_file)
+
+        if os.path.exists(path) and os.path.isdir(path):
+            try:
+                rmtree(path)
+            except OSError:
+                print("Dir wasn't deleted")
+
+        os.mkdir(path)
+
+        from PIL import Image, ImageDraw
+
+        for n, frame in enumerate(self.data.get("frames")):
+            frame = Image.open(frame)
+            draw = ImageDraw.Draw(frame)
+            for type in types:
+                fill = (255, 0, 0) if type == "endo" else (255, 255, 0)
+                contour = self.data["ready_contours"][type][n]
+                for p in range(len(contour) - 1):
+                    start = (contour[p].x(), contour[p].y())
+                    end = (contour[p + 1].x(), contour[p + 1].y())
+                    draw.line((start, end), fill=fill, width=1)
+            name = os.path.join(path, f"{n}.png")
+            frame.save(name)
+
 
     def file_data(self, path: str) -> None:
 
@@ -444,16 +526,20 @@ class ActionBar(QGroupBox):
         right: QPushButton = self.findChild(QPushButton, "right")
         if self.current_page[self.current_type] < self.amount_pages:
             self.current_page[self.current_type] += 1
-            pages.setText(str(self.current_page[self.current_type]))
-            self.turned.emit((self.current_type, self.current_page[self.current_type]))
+        elif self.current_page[self.current_type] == self.amount_pages:
+            self.current_page[self.current_type] = 1
+        pages.setText(str(self.current_page[self.current_type]))
+        self.turned.emit((self.current_type, self.current_page[self.current_type]))
 
     def previous(self) -> None:
         pages: EntryLinePostfix = self.findChild(EntryLinePostfix, "pages")
         left: QPushButton = self.findChild(QPushButton, "left")
         if self.current_page[self.current_type] > 1:
             self.current_page[self.current_type] -= 1
-            pages.setText(str(self.current_page[self.current_type]))
-            self.turned.emit((self.current_type, self.current_page[self.current_type]))
+        elif self.current_page[self.current_type] == 1:
+            self.current_page[self.current_type] = self.amount_pages
+        pages.setText(str(self.current_page[self.current_type]))
+        self.turned.emit((self.current_type, self.current_page[self.current_type]))
 
     def moveEvent(self, event: QMoveEvent) -> None:
         self.radius_slider_move(event.pos())
@@ -470,7 +556,7 @@ class Gallery(QWidget):
         layout.setContentsMargins(0, 10, 0, 10)
         layout.setSpacing(10)
 
-        menu = Menu(data)
+        menu = Menu(data, self)
 
         endo = data.get("ready_contours").get("endo")
         epi = data.get("ready_contours").get("epi")
