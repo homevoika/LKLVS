@@ -269,8 +269,9 @@ class Home(QWidget):
             left = step * (index // step)
             right = left + step
             index = left if abs(left - index) <= abs(right - index) else right
-            frame = Path(frames[index]).stem
-            return int(frame[:-1]) if frame.endswith("s") else int(frame)
+            # frame = Path(frames[index]).stem
+            # return int(frame[:-1]) if frame.endswith("s") else int(frame)
+            return index + 1
         except IndexError:
             return -1
 
