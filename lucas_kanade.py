@@ -1,7 +1,7 @@
 from typing import Union, List, Dict
 import numpy as np
 
-from PyQt5.QtCore import QThread, pyqtSignal, QPoint, QPointF
+from PyQt5.QtCore import QThread, pyqtSignal, QPoint, QPointF, QObject
 from PyQt5.QtGui import QImage
 
 from qimage2ndarray import rgb_view
@@ -255,8 +255,8 @@ def _get_points(img, amount_points):
 class LucasKanade(QThread):
     released = pyqtSignal(dict)
 
-    def __init__(self, amount_points: int):
-        super().__init__()
+    def __init__(self, amount_points: int, parent: QObject):
+        super().__init__(parent)
 
         self.amount_points = amount_points
         self.contours = {}
