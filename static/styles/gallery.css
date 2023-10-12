@@ -2,18 +2,6 @@
     background: white;
 }
 
-QProgressBar {
-    font-family: "HelveticaNowDisplay Medium";
-    background-color: #efefef;
-    color: #5F6ADC;
-    font-size: 13px;
-    border-radius: 8px;
-}
-QProgressBar:chunk {
-    background-color: #5F6ADC;
-    border-radius: 8px;
-}
-
 #caption {
     font-family: "HelveticaNowDisplay Medium";
     font-size: 24px;
@@ -114,7 +102,7 @@ QSlider:handle:hover {
     border-radius: 0;
 }
 
-#menu QPushButton {
+#menu #save_imgs, #save_data {
     font-family: "HelveticaNowDisplay Regular";
     font-size: 16px;
     color: #383838;
@@ -129,7 +117,7 @@ QSlider:handle:hover {
     width: 41px;
 }
 
-#menu QPushButton:hover {
+#menu #save_imgs:hover, #save_data:hover {
     background: #f6f6f6;
     border: 1px solid #c9c9c9;
 }
@@ -186,4 +174,21 @@ QMenu:item:selected {
     width: 70px;
     background: #e1e1e1;
     border: 1px solid #c9c9c9;
+}
+
+QProgressBar {
+    font-family: "Consolas";
+    font-size: 16px;
+    border-radius: 4px;
+    text-align: center;;
+    background: #ECECEC;
+}
+
+QProgressBar:chunk {
+    background-color: #00C834;
+    border-radius: 4px;
+}
+
+#save_dialog {
+    background: white;
 }

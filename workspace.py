@@ -10,6 +10,79 @@ from support import (EntryLine, EntryLinePostfix, IntValid,
 from lucas_kanade import LucasKanade
 
 
+class DialogProgress(QDialog):
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(25, 10, 25, 10)
+        bar = QProgressBar()
+        bar.setFixedWidth(260)
+
+        layout_buttons = QHBoxLayout()
+        layout_buttons.addStretch(False)
+
+        accept = QPushButton("OK", clicked=self.accept)
+        accept.setObjectName("accept")
+        reject = QPushButton("Cancel", clicked=self.reject)
+        reject.setObjectName("reject")
+
+        layout_buttons.addWidget(accept, alignment=Qt.AlignRight)
+        layout_buttons.addWidget(reject, alignment=Qt.AlignRight)
+
+        layout.addSpacing(10)
+        layout.addWidget(bar)
+        layout.addSpacing(10)
+        layout.addLayout(layout_buttons)
+
+        self.setObjectName("save_dialog")
+        self.setLayout(layout)
+        self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
+        self.setWindowTitle("Wait")
+        self.setFixedSize(self.sizeHint())
+
+
+class SaveContoursFrames(QThread):
+    progress = pyqtSignal(int)
+
+    def __init__(self, data: dict, parent: QObject):
+        super().__init__(parent)
+
+        self.data = data
+        self.stop = True
+        self.finished.connect(lambda: setattr(self, "stop", True))
+
+    def begin(self, types: list, path: str) -> None:
+        self.types = types
+        self.path = path
+        self.stop = False
+        self.start()
+
+    def run(self) -> None:
+        from PIL import Image, ImageDraw
+
+        for n, frame in enumerate(self.data.get("frames")):
+
+            if self.stop:
+                break
+
+            frame = Image.open(frame)
+            draw = ImageDraw.Draw(frame)
+            for type in self.types:
+                fill = (255, 0, 0) if type == "endo" else (255, 255, 0)
+                contour = self.data["ready_contours"][type][n]
+                for p in range(len(contour) - 1):
+                    start = (contour[p].x(), contour[p].y())
+                    end = (contour[p + 1].x(), contour[p + 1].y())
+                    draw.line((start, end), fill=fill, width=1)
+            name = os.path.join(self.path, f"{n}.png")
+            frame.save(name)
+            self.progress.emit(n)
+
+        del self.types
+        del self.path
+
+
 class Menu(QGroupBox):
     def _setUI(self, dir_name: str, parent: QWidget) -> None:
         self.setObjectName("menu")
@@ -93,6 +166,14 @@ class Menu(QGroupBox):
         super().__init__()
 
         self.data = data
+        self.saveContoursFrames = SaveContoursFrames(self.data, self)
+        self.progess = DialogProgress(self)
+        save_bar: QProgressBar = self.progess.findChild(QProgressBar)
+        self.progess.rejected.connect(lambda: setattr(self.saveContoursFrames, "stop", True))
+        self.saveContoursFrames.finished.connect(
+            lambda: self.progess.findChild(QPushButton, "accept").setEnabled(True))
+        self.saveContoursFrames.progress.connect(
+            lambda value: save_bar.setValue(value))
         self.dir = os.path.dirname(data.get("frames")[0])
 
         self._setUI(os.path.basename(self.dir), parent)
@@ -143,24 +224,12 @@ class Menu(QGroupBox):
 
     def save_endo_imgs(self) -> None:
         self.save_imgs(["endo"])
-        msg = QMessageBox()
-        msg.setWindowTitle("Saved")
-        msg.setText("Endo images saved successfully")
-        msg.exec_()
 
     def save_epi_imgs(self) -> None:
         self.save_imgs(["epi"])
-        msg = QMessageBox()
-        msg.setWindowTitle("Saved")
-        msg.setText("Epi images saved successfully")
-        msg.exec_()
 
     def save_both_imgs(self) -> None:
         self.save_imgs(["endo", "epi"])
-        msg = QMessageBox()
-        msg.setWindowTitle("Saved")
-        msg.setText("Endo and epi images saved successfully")
-        msg.exec_()
 
     def save_imgs(self, types: list) -> None:
 
@@ -182,22 +251,26 @@ class Menu(QGroupBox):
             except OSError:
                 print("Dir wasn't deleted")
 
+        while os.path.exists(path):
+            pass
+
         os.mkdir(path)
 
-        from PIL import Image, ImageDraw
+        if "endo" in types and "epi" in types:
+            self.progess.setWindowTitle("Endo/epi saving")
+        elif "endo":
+            self.progess.setWindowTitle("Endo saving")
+        elif "epi":
+            self.progess.setWindowTitle("Epi saving")
 
-        for n, frame in enumerate(self.data.get("frames")):
-            frame = Image.open(frame)
-            draw = ImageDraw.Draw(frame)
-            for type in types:
-                fill = (255, 0, 0) if type == "endo" else (255, 255, 0)
-                contour = self.data["ready_contours"][type][n]
-                for p in range(len(contour) - 1):
-                    start = (contour[p].x(), contour[p].y())
-                    end = (contour[p + 1].x(), contour[p + 1].y())
-                    draw.line((start, end), fill=fill, width=1)
-            name = os.path.join(path, f"{n}.png")
-            frame.save(name)
+        save_bar: QProgressBar = self.progess.findChild(QProgressBar)
+        save_bar.setRange(0, len(self.data["frames"]) - 1)
+        save_bar.reset()
+        accept = self.progess.findChild(QPushButton, "accept")
+        accept.setEnabled(False)
+        self.saveContoursFrames.begin(types, path)
+        self.progess.clearFocus()
+        self.progess.exec_()
 
 
     def file_data(self, path: str) -> None:
@@ -239,7 +312,6 @@ class WallTypes(QGroupBox):
     def _setUI(self, type: int) -> None:
 
         self.setObjectName("walltypes")
-
         layout = QHBoxLayout()
 
         binding = QIcon("static/images/binding.png")
@@ -317,8 +389,11 @@ class Picture(QGraphicsView):
         self.scene().addItem(graphic_pixmap)
 
     def sizeHint(self) -> QSize:
+        from math import ceil
         size = self.scene().items(order=Qt.AscendingOrder)[0].pixmap().size()
-        return QSize(size.width() * self.scale_value, size.height() * self.scale_value)
+        width = ceil(size.width() * self.scale_value)
+        height = ceil(size.height() * self.scale_value)
+        return QSize(width, height)
 
     def set_radius_slider(self, slider: QSlider) -> None:
         self._radius = slider
@@ -666,19 +741,12 @@ class Wait(QWidget):
         gif.setMovie(movie)
         gif.setAlignment(Qt.AlignCenter)
 
-        # progress = QProgressBar()
-        # progress.setObjectName("progress_bar")
-        # progress.setFixedSize(400, 18)
-        # progress.setRange(0, 100)
-        # progress.setAlignment(Qt.AlignCenter)
-
         caption = QLabel("Image processing... Please wait")
         caption.setObjectName("caption")
         caption.setAlignment(Qt.AlignCenter)
 
         layout.addWidget(gif)
         layout.addWidget(caption)
-        # layout.addWidget(progress, alignment=Qt.AlignCenter)
 
         self.setLayout(layout)
 
@@ -712,7 +780,7 @@ class Workspace(QStackedWidget):
 
         self._setUI(data)
 
-        self.lucas_kanade = LucasKanade(data.get("amount_points"))
+        self.lucas_kanade = LucasKanade(data.get("amount_points"), self)
         self.lucas_kanade.released.connect(self.init_gallery)
 
         self.segmentation(data)
