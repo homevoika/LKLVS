@@ -26,19 +26,19 @@
     padding-left: 5px;
 }
 
-#select_files {
+#select_files, #dicom_viewer {
     font-family: "HelveticaNowDisplay Medium";
-    height: 64px;
-    font-size: 32px;
+    height: 48px;
+    font-size: 26px;
     padding-top: 5px;
     padding-bottom: 5px;
     border: 1px solid #5F6ADC;
     background-color: #5F6ADC;
     color: white;
-    border-radius: 13px;
+    border-radius: 10px;
 }
 
-#select_files:hover {
+#select_files:hover, #dicom_viewer:hover {
     background-color: white;
     color: #5F6ADC;
 }
