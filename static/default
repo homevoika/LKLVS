@@ -3,3 +3,5 @@ amount_of_points = 49
 drawline_width = 1
 upload_dir_path =
 save_dir_path =
+save_dicom_dir_path =
+open_dicom_dir_path =
