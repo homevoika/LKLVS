@@ -154,10 +154,6 @@ class Home(QWidget):
         self.hide()
         diviewer.exec_()
         self.show()
-        if hasattr(diviewer, "converter"):
-            diviewer.converter.deleteLater()
-            del diviewer.converter
-            del diviewer.save_dialog
         diviewer.deleteLater()
 
     def get_data(self, dir: str) -> dict:
