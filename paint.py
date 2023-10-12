@@ -149,8 +149,11 @@ class Canvas(QGraphicsView):
         self.brush = QPen()
 
     def sizeHint(self) -> QSize:
+        from math import ceil
         size = self.image.shape
-        return QSize(size[1] * self.scale_value, size[0] * self.scale_value)
+        width = ceil(size[1] * self.scale_value)
+        height = ceil(size[0] * self.scale_value)
+        return QSize(width, height)
 
     def setBrush(self, mode: int = None, width: int = None, color: Union[QColor, int] = None) -> None:
         if width is not None:

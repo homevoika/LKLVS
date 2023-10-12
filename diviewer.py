@@ -66,8 +66,11 @@ class Frame(QGraphicsView):
         self.scene().addPixmap(QPixmap.fromImage(np2qim(frame)))
 
     def sizeHint(self) -> QSize:
+        from math import ceil
         size = self.scene().items(order=Qt.AscendingOrder)[0].pixmap().size()
-        return QSize(size.width() * self.scale_value, size.height() * self.scale_value)
+        width = ceil(size.width() * self.scale_value)
+        height = ceil(size.height() * self.scale_value)
+        return QSize(width, height)
 
     def setFrame(self, frame: np.ndarray) -> None:
         self.scene().clear()
@@ -238,8 +241,8 @@ class HandlerFrames(QWidget):
 class Converter(QThread):
     progress = pyqtSignal(int)
 
-    def __init__(self, data: np.ndarray):
-        super().__init__()
+    def __init__(self, data: np.ndarray, parent: QObject):
+        super().__init__(parent)
         self.data = data
         self.stop = True
         self.finished.connect(lambda: setattr(self, "stop", True))
@@ -392,7 +395,7 @@ class Diviewer(QDialog):
 
             self.save_dialog = SaveDialog(self)
             save_bar: QProgressBar = self.save_dialog.findChild(QProgressBar)
-            self.converter = Converter(self.data)
+            self.converter = Converter(self.data, self)
             self.save_dialog.rejected.connect(lambda: setattr(self.converter, "stop", True))
             self.converter.finished.connect(
                 lambda: self.save_dialog.findChild(QPushButton, "accept").setEnabled(True))
@@ -418,6 +421,7 @@ class Diviewer(QDialog):
             layout.addWidget(frame)
 
         self.setLayout(layout)
+        Utils.move_center_hint(self)
 
     def keyPressEvent(self, event: QKeyEvent):
         pass
