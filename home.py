@@ -1,6 +1,6 @@
 import os
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, QMessageBox
 from PyQt5.QtGui import QMouseEvent, QIntValidator
 from PyQt5.QtCore import QObject, Qt, QPoint, QPointF
 
@@ -8,6 +8,11 @@ from config import get_param, set_param
 from options import Options
 from paint import Paint
 from workspace import Workspace
+from diviewer import Diviewer
+
+from pydicom import dcmread, errors
+from pydicom.pixel_data_handlers import convert_color_space
+from pathlib import Path
 
 from typing import Union
 
@@ -82,12 +87,20 @@ class Home(QWidget):
         select_files.setFixedWidth(310)
         select_files.clicked.connect(self.upload_files)
 
+        dicom_viewer = QPushButton("Dicom viewer")
+        dicom_viewer.setObjectName("dicom_viewer")
+        dicom_viewer.setCursor(Qt.PointingHandCursor)
+        dicom_viewer.setFixedWidth(310)
+        dicom_viewer.clicked.connect(self.dicom_viewer)
+
         layout.addWidget(title)
         layout.addSpacing(20)
         layout.addWidget(amount_points)
         layout.addWidget(step_processing)
         layout.addSpacing(30)
         layout.addWidget(select_files, alignment=Qt.AlignCenter)
+        layout.addSpacing(20)
+        layout.addWidget(dicom_viewer, alignment=Qt.AlignCenter)
 
         self.setLayout(layout)
 
@@ -99,6 +112,53 @@ class Home(QWidget):
         self.setWindowTitle("LKLVS")
         self.setFixedSize(self.sizeHint().width(), self.sizeHint().height())
         self.setFocus()
+
+    def dicom_viewer(self) -> None:
+        file = QFileDialog.getOpenFileName(
+            self,
+            caption="Select DICOM file",
+            directory=get_param("open_dicom_dir_path")
+        )
+
+        if not file[0]:
+            return
+
+        set_param("open_dicom_dir_path", os.path.dirname(file[0]))
+
+        try:
+            dicom = dcmread(file[0])
+        except (errors.InvalidDicomError, TypeError):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Error")
+            msg.setText("Invalid DICOM file")
+            msg.exec_()
+            return
+
+        data = None
+
+        if "PixelData" in dicom:
+            data = dicom.pixel_array
+            if "PhotometricInterpretation" in dicom:
+                interp = dicom.PhotometricInterpretation
+                if interp in ("YBR_FULL_422", "YBR_FULL"):
+                    data = convert_color_space(data, interp, "RGB")
+
+        del dicom
+
+        if data is None:
+            return
+
+
+        diviewer = Diviewer(data)
+        self.hide()
+        diviewer.exec_()
+        self.show()
+        if hasattr(diviewer, "converter"):
+            diviewer.converter.deleteLater()
+            del diviewer.converter
+            del diviewer.save_dialog
+        diviewer.deleteLater()
 
     def get_data(self, dir: str) -> dict:
 
@@ -160,7 +220,6 @@ class Home(QWidget):
             del data["ready_images"]
 
         try:
-            from pathlib import Path
 
             def key(path: str) -> int:
                 name = Path(path).stem
@@ -262,7 +321,6 @@ class Home(QWidget):
             self.gallery_ready_images(data)
 
     def find_sys_id(self, frames: list, step: int) -> int:
-        from pathlib import Path
         ids = list(filter(lambda file: Path(file).stem.endswith("s"), frames))
         try:
             index = frames.index(ids[0])
